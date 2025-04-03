@@ -1,14 +1,5 @@
-releasever: 9
-
-repos:
-  - baseos
-  - appstream
-
-variables:
-  distro: "almalinux9"
-
 packages:
-  - almalinux-repos
+  - almalinux-kitten-repos
   - libvirt-daemon-common
   - libvirt-daemon-config-network
   - libvirt-daemon-driver-interface
@@ -58,4 +49,4 @@ postprocess:
     ln -s ../libvirt-guests.service /usr/lib/systemd/system/default.target.wants/libvirt-guests.service
 
 include:
-  - fedora-bootc/standard/manifest.yaml
+  - standard/manifest.yaml

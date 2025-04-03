@@ -2,7 +2,7 @@ name: Build anaconda ISO
 on: 
   workflow_dispatch:
 env:
-  IMAGE: ghcr.io/yuanandcircle/almavirt:9
+  IMAGE: ghcr.io/yuanandcircle/almavirt:10-kitten
 jobs:
   build:
     runs-on: ubuntu-latest
