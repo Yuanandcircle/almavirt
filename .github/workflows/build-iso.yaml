@@ -1,0 +1,27 @@
+name: Build anaconda ISO
+on: 
+  workflow_dispatch:
+env:
+  IMAGE: ghcr.io/yuanandcircle/almavirt:9
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build
+        run: |
+          mkdir output
+          sudo podman pull ${{ env.IMAGE }}
+          sudo podman run --rm --privileged --security-opt label=type:unconfined_t \
+            -v ./config.toml:/config.toml:ro -v ./output:/output \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            --type anaconda-iso --use-librepo=False --chown $(id -u):$(id -g) \
+            ${{ env.IMAGE }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: almavirt
+          path: output
+          retention-days: 1

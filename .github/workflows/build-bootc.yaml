@@ -1,0 +1,44 @@
+name: Build bootc container
+on: 
+  workflow_dispatch:
+env:
+  IMAGE: ghcr.io/yuanandcircle/almavirt:9
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/centos-bootc/bootc-image-builder:latest
+      options: --privileged --security-opt label=type:unconfined_t
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Install Git
+        run: |
+          dnf -y install git
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build
+        run: |
+          rpm-ostree compose image --initialize --format=ociarchive \
+            --image-config=almavirt-bootc-config.json almavirt.yaml \
+            out.ociarchive
+      - name: Push
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | skopeo login ghcr.io -u $ --password-stdin
+          skopeo copy oci-archive:./out.ociarchive docker://${{ env.IMAGE }}
+  clean:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: almavirt
+          package-type: container
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: true

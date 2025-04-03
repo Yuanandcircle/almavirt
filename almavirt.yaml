@@ -1,0 +1,60 @@
+releasever: 9
+
+repos:
+  - baseos
+  - appstream
+
+variables:
+  distro: "almalinux9"
+
+packages:
+  - almalinux-repos
+  - libvirt-daemon-common
+  - libvirt-daemon-config-network
+  - libvirt-daemon-driver-interface
+  - libvirt-daemon-driver-network
+  - libvirt-daemon-driver-nodedev
+  - libvirt-daemon-driver-nwfilter
+  - libvirt-daemon-driver-qemu
+  - libvirt-daemon-driver-secret
+  - libvirt-daemon-driver-storage-core
+  - libvirt-daemon-lock
+  - libvirt-daemon-log
+  - libvirt-daemon-plugin-lockd
+  - libvirt-daemon-proxy
+  - qemu-kvm
+  - qemu-img
+  - edk2-ovmf
+  - virt-install
+
+etc-group-members:
+  - libvirt
+
+postprocess:
+  - |
+    #!/usr/bin/env bash
+    mkdir -p /usr/lib/bootc/install/
+    cat > /usr/lib/bootc/install/20-rhel.toml << EOF
+    [install]
+    root-fs-type = "xfs"
+    EOF
+  - |
+    #!/usr/bin/env bash
+    mkdir -p /usr/lib/bootc/kargs.d/
+    cat > /usr/lib/bootc/kargs.d/20-iommu.toml << EOF
+    kargs = ["intel_iommu=on", "amd_iommu=on", "iommu=pt"]
+    match-architectures = ["x86_64"]
+    EOF
+  - |
+    #!/usr/bin/env bash
+    mkdir -p /etc/sysconfig/
+    cat > /etc/sysconfig/libvirt-guests << EOF
+    ON_SHUTDOWN=shutdown
+    EOF
+  - |
+    #!/usr/bin/env bash
+    mkdir -p /usr/lib/systemd/system/default.target.wants/
+    ln -s ../libvirt-guests.service /usr/lib/systemd/system/default.target.wants/libvirt-guests.service
+
+include:
+  - fedora-bootc/standard/manifest.yaml
