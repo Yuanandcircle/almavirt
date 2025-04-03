@@ -22,6 +22,7 @@ packages:
   - libvirt-daemon-log
   - libvirt-daemon-plugin-lockd
   - libvirt-daemon-proxy
+  - libvirt-ssh-proxy
   - qemu-kvm
   - qemu-img
   - edk2-ovmf
